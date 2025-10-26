@@ -1,0 +1,52 @@
+{
+  "hash": "8fd85669",
+  "configHash": "340ad093",
+  "lockfileHash": "c864f178",
+  "browserHash": "d2db450d",
+  "optimized": {
+    "@angular/common": {
+      "src": "../../../../../../node_modules/@angular/common/fesm2022/common.mjs",
+      "file": "@angular_common.js",
+      "fileHash": "94b3f7cc",
+      "needsInterop": false
+    },
+    "@angular/core": {
+      "src": "../../../../../../node_modules/@angular/core/fesm2022/core.mjs",
+      "file": "@angular_core.js",
+      "fileHash": "f9c0fbf1",
+      "needsInterop": false
+    },
+    "@angular/platform-browser": {
+      "src": "../../../../../../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs",
+      "file": "@angular_platform-browser.js",
+      "fileHash": "55e62d31",
+      "needsInterop": false
+    },
+    "@angular/router": {
+      "src": "../../../../../../node_modules/@angular/router/fesm2022/router.mjs",
+      "file": "@angular_router.js",
+      "fileHash": "1b8864c0",
+      "needsInterop": false
+    },
+    "ugx-xlsx": {
+      "src": "../../../../../../ugx-xlsx/dist/index.js",
+      "file": "ugx-xlsx.js",
+      "fileHash": "87e46bc2",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-WB3CREPI": {
+      "file": "chunk-WB3CREPI.js"
+    },
+    "chunk-EPIXZOW2": {
+      "file": "chunk-EPIXZOW2.js"
+    },
+    "chunk-7FWDKZSN": {
+      "file": "chunk-7FWDKZSN.js"
+    },
+    "chunk-V4F5PRXT": {
+      "file": "chunk-V4F5PRXT.js"
+    }
+  }
+}

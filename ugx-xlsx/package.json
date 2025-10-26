@@ -1,0 +1,50 @@
+{
+  "name": "ugx-xlsx",
+  "version": "0.1.0",
+  "description": "Safe, TypeScript-first Excel utilities (JSON → XLSX/CSV) for Angular 16+ and modern web.",
+  "private": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "excel",
+    "xlsx",
+    "csv",
+    "exceljs",
+    "angular",
+    "typescript",
+    "export",
+    "json"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "exceljs": "^4.3.0",
+    "file-saver": "^2.0.5"
+  },
+  "devDependencies": {
+    "@types/file-saver": "^2.0.7",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
