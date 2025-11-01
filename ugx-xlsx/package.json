@@ -1,22 +1,30 @@
 {
   "name": "ugx-xlsx",
-  "version": "0.1.0",
-  "description": "Safe, TypeScript-first Excel utilities (JSON → XLSX/CSV) for Angular 16+ and modern web.",
+  "version": "0.1.1",
+  "description": "Safe, TypeScript-first Excel utilities (JSON → XLSX/CSV) for Angular and modern web.",
   "private": false,
-  "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/esm2020/index.d.ts",
+      "es2020": "./dist/esm2020/index.js",
+      "import": "./dist/esm2015/index.js",
+      "require": "./dist/cjs/index.js"
     }
   },
-  "types": "dist/index.d.ts",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm2015/index.js",
+  "es2020": "dist/esm2020/index.js",
+  "types": "dist/esm2020/index.d.ts",
   "files": [
     "dist"
   ],
-  "sideEffects": false,
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "npm run clean && npm run build:esm2020 && npm run build:esm2015 && npm run build:cjs",
+    "build:esm2020": "tsc -p tsconfig.esm2020.json",
+    "build:esm2015": "tsc -p tsconfig.esm2015.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "clean": "rimraf dist",
     "test": "vitest run",
     "prepare": "npm run build"
   },
@@ -24,27 +32,21 @@
     "excel",
     "xlsx",
     "csv",
-    "exceljs",
     "angular",
     "typescript",
-    "export",
-    "json"
+    "export"
   ],
   "license": "MIT",
   "dependencies": {
-    "exceljs": "^4.3.0",
-    "file-saver": "^2.0.5"
+    "exceljs": "^4.3.0"
   },
   "devDependencies": {
-    "@types/file-saver": "^2.0.7",
     "@types/node": "^20.0.0",
+    "rimraf": "^5.0.0",
     "typescript": "^5.3.0",
     "vitest": "^1.0.0"
   },
   "engines": {
     "node": ">=18"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }
