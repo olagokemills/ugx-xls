@@ -1,6 +1,6 @@
 {
   "name": "ugx-xlsx",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "description": "Safe, TypeScript-first Excel utilities (JSON → XLSX/CSV) for Angular and modern web.",
   "private": false,
   "sideEffects": false,
