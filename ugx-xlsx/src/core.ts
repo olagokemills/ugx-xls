@@ -1,6 +1,7 @@
-import Excel from "exceljs";
 import { sanitizeHeader, enforceLimits } from "./sanitizer";
 import { SpreadsheetError } from "./errors";
+import writeXlsxFile from "write-excel-file";
+import type { Cell, SheetData } from "write-excel-file";
 
 export type WorksheetRow = Record<string, any>;
 
@@ -20,11 +21,36 @@ export const DEFAULT_WRITE_OPTIONS: Required<WriteOptions> = {
   maxCellChars: 10_000,
 };
 
+type CellValue = string | number | boolean | Date;
+type NodeWriteXlsxFn = (
+  data: SheetData,
+  options: { buffer: true; sheet?: string }
+) => Promise<Uint8Array>;
+
+function isNodeRuntime(): boolean {
+  const g = globalThis as {
+    process?: { versions?: { node?: string } };
+  };
+  return !!g.process?.versions?.node;
+}
+
+function getNodeWriter(): NodeWriteXlsxFn | undefined {
+  const g = globalThis as { require?: (name: string) => unknown };
+  if (typeof g.require === "function") {
+    const loaded = g.require("write-excel-file/node") as
+      | { default?: NodeWriteXlsxFn }
+      | NodeWriteXlsxFn;
+    if (typeof loaded === "function") return loaded;
+    return loaded.default;
+  }
+  return undefined;
+}
+
 /** JSON → XLSX buffer (Node/Browser compatible buffer) */
 export async function jsonToWorkbookBuffer(
   rows: WorksheetRow[],
   opts?: WriteOptions
-): Promise<ArrayBuffer | Buffer> {
+): Promise<ArrayBuffer | Uint8Array> {
   const options = { ...DEFAULT_WRITE_OPTIONS, ...(opts || {}) };
 
   if (!Array.isArray(rows)) {
@@ -34,15 +60,7 @@ export async function jsonToWorkbookBuffer(
     throw new SpreadsheetError("Row limit exceeded", "LIMIT_ROWS");
   }
 
-  const wb = new Excel.Workbook();
-  const ws = wb.addWorksheet(options.sheetName);
-
-  if (rows.length === 0) {
-    ws.addRow([]);
-    return wb.xlsx.writeBuffer();
-  }
-
-  const headers = Object.keys(rows[0])
+  const headers = (rows[0] ? Object.keys(rows[0]) : [])
     .slice(0, options.maxCols)
     .map((h) => (options.sanitizeHeaders ? sanitizeHeader(h) : h));
 
@@ -50,7 +68,13 @@ export async function jsonToWorkbookBuffer(
     throw new SpreadsheetError("Column limit exceeded", "LIMIT_COLS");
   }
 
-  ws.addRow(headers);
+  const data: SheetData = [];
+
+  if (rows.length === 0) {
+    data.push([]);
+  } else {
+    data.push(headers.map((h) => ({ value: h } as Cell)));
+  }
 
   for (let i = 0; i < rows.length; i++) {
     if (i + 1 > options.maxRows) {
@@ -61,7 +85,7 @@ export async function jsonToWorkbookBuffer(
     }
 
     const r = rows[i];
-    const values: string[] = [];
+    const values: Cell[] = [];
 
     for (let c = 0; c < headers.length; c++) {
       if (c + 1 > options.maxCols) {
@@ -74,7 +98,7 @@ export async function jsonToWorkbookBuffer(
       let v = r[key];
 
       if (v === undefined || v === null) {
-        values.push("");
+        values.push({ value: "" } as Cell);
         continue;
       }
       if (typeof v === "object") {
@@ -87,11 +111,22 @@ export async function jsonToWorkbookBuffer(
         v = String(v);
       }
 
-      values.push(enforceLimits(v, options.maxCellChars));
+      values.push({ value: enforceLimits(v, options.maxCellChars) } as Cell);
     }
 
-    ws.addRow(values);
+    data.push(values);
   }
 
-  return wb.xlsx.writeBuffer();
+  if (isNodeRuntime()) {
+    const nodeWriter = getNodeWriter();
+    if (nodeWriter) {
+      return nodeWriter(data, {
+        buffer: true,
+        sheet: options.sheetName,
+      });
+    }
+  }
+
+  const out = await writeXlsxFile(data, { sheet: options.sheetName });
+  return out.arrayBuffer();
 }

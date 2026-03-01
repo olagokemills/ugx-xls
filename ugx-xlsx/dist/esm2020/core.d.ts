@@ -8,4 +8,4 @@ export interface WriteOptions {
 }
 export declare const DEFAULT_WRITE_OPTIONS: Required<WriteOptions>;
 /** JSON → XLSX buffer (Node/Browser compatible buffer) */
-export declare function jsonToWorkbookBuffer(rows: WorksheetRow[], opts?: WriteOptions): Promise<ArrayBuffer | Buffer>;
+export declare function jsonToWorkbookBuffer(rows: WorksheetRow[], opts?: WriteOptions): Promise<ArrayBuffer | Uint8Array>;
