@@ -1,94 +1,115 @@
 # ugx-xlsx
 
-A lightweight Excel export utility for Angular applications.  
-Easily convert arrays or objects into `.xlsx` files **directly in the browser** — no backend required.
+Safe, TypeScript-first Excel & CSV export for Angular and modern web apps.  
+Convert plain JSON arrays into `.xlsx` or `.csv` files **directly in the browser** — no backend required.
 
-![npm](https://img.shields.io/npm/v/ugx-xlsx)
-![downloads](https://img.shields.io/npm/dm/ugx-xlsx)
-![license](https://img.shields.io/npm/l/ugx-xlsx)
-
----
-
-## ✨ Features
-
-- Simple API — one method to export data to Excel
-- Supports arrays of objects and arrays of arrays
-- Custom file name, sheet name, and headers
-- Runs fully in the browser
-- Built for Angular + TypeScript
+[![npm](https://img.shields.io/npm/v/ugx-xlsx)](https://www.npmjs.com/package/ugx-xlsx)
+[![downloads](https://img.shields.io/npm/dm/ugx-xlsx)](https://www.npmjs.com/package/ugx-xlsx)
+[![license](https://img.shields.io/npm/l/ugx-xlsx)](./package.json)
 
 ---
 
-## 📦 Installation
-
-Install with npm:
+## Installation
 
 ```bash
 npm install ugx-xlsx
-
-yarn add ugx-xlsx
-
 ```
 
-## 📘 How to Use ugx-xlsx in Angular
+---
 
-```
-import { UgxXlsxService } from 'ugx-xlsx';
-```
+## Usage
 
-Inject the Service in Your Component
+### Export to Excel (browser)
 
-```
-constructor(private ugxXlsx: UgxXlsxService) {}
-```
+```typescript
+import { exportJsonToExcel } from 'ugx-xlsx';
 
-### Prepare Your Data
-
-You can export arrays of objects or arrays of arrays.
-
-```
-const data = [
-  { name: 'John Doe', age: 30, email: 'john@mail.com' },
-  { name: 'Jane Smith', age: 25, email: 'jane@mail.com' }
+const rows = [
+  { name: 'Alice', score: 42 },
+  { name: 'Bob',   score: 98 },
 ];
+
+await exportJsonToExcel(rows, 'results');
+// → triggers download of results.xlsx
 ```
 
-### Export to Excel
+### Export to CSV (browser)
 
+```typescript
+import { exportJsonToCsv } from 'ugx-xlsx';
+
+await exportJsonToCsv(rows, 'results', { includeBom: true });
+// → triggers download of results.csv (BOM ensures correct encoding in Excel on Windows)
 ```
-this.ugxXlsx.exportToExcel(data, {
-  fileName: 'users'
-});
 
+### Generate a buffer (Node.js / server-side)
 
-<button (click)="downloadExcel()">Download Excel</button>
+```typescript
+import { jsonToWorkbookBuffer } from 'ugx-xlsx';
+import fs from 'node:fs';
 
-downloadExcel() {
-  const rows = [
-    { id: 1, item: 'Apples', qty: 10 },
-    { id: 2, item: 'Bananas', qty: 6 }
-  ];
+const buf = await jsonToWorkbookBuffer(rows, { sheetName: 'Scores' });
+fs.writeFileSync('results.xlsx', Buffer.from(buf));
+```
 
-  this.ugxXlsx.exportToExcel(rows, { fileName: 'inventory' });
+### Generate a CSV string
+
+```typescript
+import { jsonToCsvString } from 'ugx-xlsx';
+
+const csv = jsonToCsvString(rows, { includeBom: true });
+fs.writeFileSync('results.csv', csv, 'utf8');
+```
+
+---
+
+## API
+
+| Function | Returns | Description |
+|----------|---------|-------------|
+| `exportJsonToExcel(rows, fileName?, opts?)` | `Promise<void>` | Browser XLSX download |
+| `exportJsonToCsv(data, fileName?, opts?)` | `Promise<void>` | Browser CSV download |
+| `jsonToWorkbookBuffer(rows, opts?)` | `Promise<ArrayBuffer \| Uint8Array>` | Raw XLSX buffer (Node + browser) |
+| `jsonToCsvString(rows, opts?)` | `string` | RFC 4180 CSV string |
+
+### `WriteOptions`
+
+```typescript
+interface WriteOptions {
+  sheetName?: string;        // default: "Sheet1"
+  sanitizeHeaders?: boolean; // default: true
+  maxRows?: number;          // default: 100_000
+  maxCols?: number;          // default: 1_000
+  maxCellChars?: number;     // default: 10_000
 }
+```
 
-export interface UgxXlsxOptions {
-  fileName?: string;   // default: 'export'
-  sheetName?: string;  // default: 'Sheet1'
-  headers?: string[];  // optional: custom header labels
+### `CsvOptions`
+
+```typescript
+interface CsvOptions {
+  sanitizeHeaders?: boolean;
+  maxRows?: number;
+  maxCols?: number;
+  maxCellChars?: number;
+  headers?: string[];   // explicit column order
+  includeBom?: boolean; // prepend UTF-8 BOM (recommended for Excel on Windows)
 }
 ```
 
-### Contributing
+### `SpreadsheetError`
 
-Contributions and suggestions are welcome.
+Thrown on invalid input or limit violations. Has a `code` property:
+`"INVALID_INPUT"` | `"LIMIT_ROWS"` | `"LIMIT_COLS"`.
 
-Fork the repository
+---
 
-Create a new branch
+## Full documentation
 
-Make your changes
+See the [repository README](https://github.com/olagokemills/ugx-xls#readme) for the complete API reference and contributing guide.
 
-Open a pull request
+---
 
-https://github.com/olagokemills/ugx-xls
+## License
+
+MIT
